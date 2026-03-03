@@ -6,7 +6,6 @@ This project installs two commands:
 
 - `taskbar-month-calendar`
 - `taskbar-year-calendar`
-- `taskbar-calendar-toggle`
 
 Current confirmed runtime target is Hyprland. Window placement and geometry are handled by compositor/window-manager rules via window class.
 
@@ -120,17 +119,6 @@ Week numbers are enabled by default.
 ## Waybar integration example
 
 See [`examples/waybar-clock-snippet.jsonc`](examples/waybar-clock-snippet.jsonc).
-
-## Taskbar-like toggle on X11
-
-Use `taskbar-calendar-toggle` for a click-to-open / click-to-close behavior.
-It uses `xdotool` when available to close existing calendar windows by class.
-
-You can bind your panel/taskbar launcher button to:
-
-```bash
-taskbar-calendar-toggle
-```
 
 ## Window manager rules
 

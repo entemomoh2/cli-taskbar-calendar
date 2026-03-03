@@ -181,9 +181,23 @@ alacritty \
 launch_target() {
   local target="$1"
   local week="$2"
-  command -v "$target" >/dev/null 2>&1 || return 1
-  CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target" >/dev/null 2>&1 &
-  return 0
+  local cmd="env CLI_TASKBAR_CAL_WEEK_NUMBERS=${week} ${target}"
+  if command -v hyprctl >/dev/null 2>&1; then
+    if hyprctl dispatch exec "$cmd" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  if command -v swaymsg >/dev/null 2>&1; then
+    if swaymsg exec "$cmd" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  if command -v systemd-run >/dev/null 2>&1; then
+    if systemd-run --user --collect --setenv=CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target"
 }
 
 month=$((10#$1))
@@ -231,9 +245,8 @@ while true; do
       year=$(date +%Y)
       ;;
     y)
-      if launch_target taskbar-year-calendar "$week_numbers"; then
-        break
-      fi
+      launch_target taskbar-year-calendar "$week_numbers"
+      break
       ;;
   esac
 done
