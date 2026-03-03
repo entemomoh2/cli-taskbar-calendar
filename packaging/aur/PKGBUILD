@@ -5,11 +5,11 @@ pkgver=0.1.0
 pkgrel=1
 pkgdesc="Month/year popup calendar scripts for taskbar integrations"
 arch=('any')
-url="https://github.com/your-github-user/cli-taskbar-calendar"
+url="https://github.com/entemomoh2/cli-taskbar-calendar"
 license=('MIT')
 depends=('bash' 'util-linux' 'alacritty')
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/your-github-user/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('SKIP')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/entemomoh2/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('29c3eeae06abd49b0af1f9227d1366d8139ec692d865b9356e8cec924ef12389')
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
