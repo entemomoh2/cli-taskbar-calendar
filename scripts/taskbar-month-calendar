@@ -180,14 +180,17 @@ alacritty \
   -e bash -c '
 launch_target() {
   local target="$1"
+  local week="$2"
+  local cmd="env CLI_TASKBAR_CAL_WEEK_NUMBERS=${week} ${target}"
   if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl dispatch exec "$target"
+    hyprctl dispatch exec "$cmd"
   elif command -v swaymsg >/dev/null 2>&1; then
-    swaymsg exec "$target"
+    swaymsg exec "$cmd"
   elif command -v systemd-run >/dev/null 2>&1; then
-    systemd-run --user --collect "$target" >/dev/null 2>&1 || "$target"
+    systemd-run --user --collect --setenv=CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target" >/dev/null 2>&1 \
+      || CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target"
   else
-    "$target"
+    CLI_TASKBAR_CAL_WEEK_NUMBERS="$week" "$target"
   fi
 }
 
@@ -236,7 +239,7 @@ while true; do
       year=$(date +%Y)
       ;;
     y)
-      launch_target taskbar-year-calendar
+      launch_target taskbar-year-calendar "$week_numbers"
       break
       ;;
   esac
