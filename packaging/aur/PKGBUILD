@@ -9,13 +9,14 @@ url="https://github.com/entemomoh2/cli-taskbar-calendar"
 license=('MIT')
 depends=('bash' 'util-linux' 'alacritty')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/entemomoh2/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('4b2316274fbf5dcb8fa20f887ec579a6f4f5cbd1c5962a6e42a5c4a147c7162d')
+sha256sums=('a04c715304601434a02edf500f480ac62747642eca07eca7465035be03f37b1c')
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   install -Dm755 scripts/taskbar-month-calendar "${pkgdir}/usr/bin/taskbar-month-calendar"
   install -Dm755 scripts/taskbar-year-calendar "${pkgdir}/usr/bin/taskbar-year-calendar"
+  install -Dm755 scripts/taskbar-calendar-toggle "${pkgdir}/usr/bin/taskbar-calendar-toggle"
 
   install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
   install -Dm644 examples/waybar-clock-snippet.jsonc "${pkgdir}/usr/share/doc/${pkgname}/examples/waybar-clock-snippet.jsonc"

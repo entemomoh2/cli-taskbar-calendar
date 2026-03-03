@@ -1,3 +1,4 @@
+# UNTESTED TEMPLATE
 # KWin Rule Notes
 
 Use KDE System Settings -> Window Management -> Window Rules.

@@ -6,8 +6,15 @@ This project installs two commands:
 
 - `taskbar-month-calendar`
 - `taskbar-year-calendar`
+- `taskbar-calendar-toggle`
 
-It is desktop-agnostic at runtime. Window placement and geometry are intentionally handled by compositor/window-manager rules via window class.
+Current confirmed runtime target is Hyprland. Window placement and geometry are handled by compositor/window-manager rules via window class.
+
+## Current support status
+
+- Confirmed working: Hyprland
+- Untested: Sway
+- Untested: KDE Plasma (X11/Wayland)
 
 ## Features
 
@@ -114,6 +121,17 @@ Week numbers are enabled by default.
 
 See [`examples/waybar-clock-snippet.jsonc`](examples/waybar-clock-snippet.jsonc).
 
+## Taskbar-like toggle on X11
+
+Use `taskbar-calendar-toggle` for a click-to-open / click-to-close behavior.
+It uses `xdotool` when available to close existing calendar windows by class.
+
+You can bind your panel/taskbar launcher button to:
+
+```bash
+taskbar-calendar-toggle
+```
+
 ## Window manager rules
 
 Use class-based rules for placement and sizing:
@@ -127,6 +145,8 @@ Examples:
 - [`examples/sway-criteria.conf`](examples/sway-criteria.conf)
 - [`examples/kwin-rule-notes.md`](examples/kwin-rule-notes.md)
 
+For now, treat Sway and KDE examples as untested templates.
+
 ## AUR packaging
 
 AUR files are in [`packaging/aur`](packaging/aur).
@@ -137,3 +157,10 @@ Before publishing to AUR, update `source` owner and checksums in `PKGBUILD`.
 
 No compatibility or clean-machine test claims are made in this repository yet.
 Use your own validation checklist and promote support statements only after your approval.
+
+## TODO
+
+- Test Sway popup launch and month/year switching (`y`/`m`)
+- Test KDE Plasma X11 popup launch and month/year switching (`y`/`m`)
+- Test KDE window-rule behavior with both month and year classes
+- Promote Sway/KDE from untested to confirmed only after validation
