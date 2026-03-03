@@ -1,0 +1,129 @@
+# cli-taskbar-calendar
+
+Lightweight month/year popup calendars for taskbar integrations.
+
+This project installs two commands:
+
+- `taskbar-month-calendar`
+- `taskbar-year-calendar`
+
+It is desktop-agnostic at runtime. Window placement and geometry are intentionally handled by compositor/window-manager rules via window class.
+
+## Features
+
+- Month and year popup views in Alacritty
+- Arrow-key navigation
+- Quick toggle between month/year views (`y` and `m`)
+- `q` to close, `t` to jump to current date/year
+- Config file + env vars + CLI flags with strict precedence
+- Global show/hide option for week numbers
+
+## Runtime dependencies
+
+- `bash`
+- `util-linux` (provides `cal`)
+- `alacritty`
+
+No hard dependency on Waybar, Hyprland, Sway, KDE, or Python.
+
+## Usage
+
+### Month view
+
+```bash
+taskbar-month-calendar [OPTIONS] [MONTH] [YEAR]
+```
+
+### Year view
+
+```bash
+taskbar-year-calendar [OPTIONS] [YEAR]
+```
+
+### Options (both commands)
+
+- `--columns <int>`
+- `--lines <int>`
+- `--class <string>`
+- `--title <string>`
+- `--week-numbers`
+- `--no-week-numbers`
+- `-h, --help`
+
+## Configuration
+
+Config file path:
+
+```bash
+~/.config/cli-taskbar-calendar/config
+```
+
+Format: shell-style `KEY=VALUE`.
+
+Example:
+
+```bash
+CLI_TASKBAR_CAL_MONTH_COLUMNS=32
+CLI_TASKBAR_CAL_MONTH_LINES=12
+CLI_TASKBAR_CAL_YEAR_COLUMNS=80
+CLI_TASKBAR_CAL_YEAR_LINES=28
+CLI_TASKBAR_CAL_MONTH_CLASS="taskbar-month-calendar"
+CLI_TASKBAR_CAL_YEAR_CLASS="taskbar-year-calendar"
+CLI_TASKBAR_CAL_MONTH_TITLE="Taskbar Month Calendar"
+CLI_TASKBAR_CAL_YEAR_TITLE="Taskbar Year Calendar"
+CLI_TASKBAR_CAL_WEEK_NUMBERS=1
+```
+
+Precedence is always:
+
+1. CLI flags
+2. Environment variables
+3. Config file
+4. Built-in defaults
+
+## Environment variables
+
+- `CLI_TASKBAR_CAL_MONTH_COLUMNS`
+- `CLI_TASKBAR_CAL_MONTH_LINES`
+- `CLI_TASKBAR_CAL_YEAR_COLUMNS`
+- `CLI_TASKBAR_CAL_YEAR_LINES`
+- `CLI_TASKBAR_CAL_MONTH_CLASS`
+- `CLI_TASKBAR_CAL_YEAR_CLASS`
+- `CLI_TASKBAR_CAL_MONTH_TITLE`
+- `CLI_TASKBAR_CAL_YEAR_TITLE`
+- `CLI_TASKBAR_CAL_WEEK_NUMBERS` (`1|0`, `true|false`, `yes|no`, `on|off`)
+
+## Week numbers
+
+Week numbers are enabled by default.
+
+- Enable: `--week-numbers` or `CLI_TASKBAR_CAL_WEEK_NUMBERS=1`
+- Disable: `--no-week-numbers` or `CLI_TASKBAR_CAL_WEEK_NUMBERS=0`
+
+## Waybar integration example
+
+See [`examples/waybar-clock-snippet.jsonc`](examples/waybar-clock-snippet.jsonc).
+
+## Window manager rules
+
+Use class-based rules for placement and sizing:
+
+- month class: `taskbar-month-calendar`
+- year class: `taskbar-year-calendar`
+
+Examples:
+
+- [`examples/hyprland-rules.conf`](examples/hyprland-rules.conf)
+- [`examples/sway-criteria.conf`](examples/sway-criteria.conf)
+- [`examples/kwin-rule-notes.md`](examples/kwin-rule-notes.md)
+
+## AUR packaging
+
+AUR files are in [`packaging/aur`](packaging/aur).
+
+Before publishing to AUR, update `source` owner and checksums in `PKGBUILD`.
+
+## Validation status
+
+No compatibility or clean-machine test claims are made in this repository yet.
+Use your own validation checklist and promote support statements only after your approval.

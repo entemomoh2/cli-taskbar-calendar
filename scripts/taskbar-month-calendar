@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_COLUMNS=32
+DEFAULT_LINES=12
+DEFAULT_CLASS="taskbar-month-calendar"
+DEFAULT_TITLE="Taskbar Month Calendar"
+DEFAULT_WEEK_NUMBERS=1
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/cli-taskbar-calendar/config"
+
+usage() {
+  cat <<'USAGE'
+Usage: taskbar-month-calendar [OPTIONS] [MONTH] [YEAR]
+
+Options:
+  --columns <int>      Terminal columns for popup content
+  --lines <int>        Terminal lines for popup content
+  --class <string>     Alacritty class/app_id
+  --title <string>     Alacritty window title
+  --week-numbers       Show week numbers
+  --no-week-numbers    Hide week numbers
+  -h, --help           Show this help
+USAGE
+}
+
+die() {
+  echo "taskbar-month-calendar: $*" >&2
+  exit 1
+}
+
+is_positive_int() {
+  [[ "$1" =~ ^[1-9][0-9]*$ ]]
+}
+
+normalize_bool() {
+  local raw="${1:-}"
+  local fallback="$2"
+  case "${raw,,}" in
+    1|true|yes|on) echo 1 ;;
+    0|false|no|off) echo 0 ;;
+    "") echo "$fallback" ;;
+    *) echo "$fallback" ;;
+  esac
+}
+
+# Capture env vars so env wins over config after sourcing.
+ENV_HAS_MONTH_COLUMNS=0
+ENV_HAS_MONTH_LINES=0
+ENV_HAS_MONTH_CLASS=0
+ENV_HAS_MONTH_TITLE=0
+ENV_HAS_WEEK_NUMBERS=0
+
+if [[ -v CLI_TASKBAR_CAL_MONTH_COLUMNS ]]; then
+  ENV_HAS_MONTH_COLUMNS=1
+  ENV_MONTH_COLUMNS="$CLI_TASKBAR_CAL_MONTH_COLUMNS"
+fi
+if [[ -v CLI_TASKBAR_CAL_MONTH_LINES ]]; then
+  ENV_HAS_MONTH_LINES=1
+  ENV_MONTH_LINES="$CLI_TASKBAR_CAL_MONTH_LINES"
+fi
+if [[ -v CLI_TASKBAR_CAL_MONTH_CLASS ]]; then
+  ENV_HAS_MONTH_CLASS=1
+  ENV_MONTH_CLASS="$CLI_TASKBAR_CAL_MONTH_CLASS"
+fi
+if [[ -v CLI_TASKBAR_CAL_MONTH_TITLE ]]; then
+  ENV_HAS_MONTH_TITLE=1
+  ENV_MONTH_TITLE="$CLI_TASKBAR_CAL_MONTH_TITLE"
+fi
+if [[ -v CLI_TASKBAR_CAL_WEEK_NUMBERS ]]; then
+  ENV_HAS_WEEK_NUMBERS=1
+  ENV_WEEK_NUMBERS="$CLI_TASKBAR_CAL_WEEK_NUMBERS"
+fi
+
+if [[ -f "$CONFIG_FILE" ]]; then
+  # shellcheck source=/dev/null
+  source "$CONFIG_FILE"
+fi
+
+if (( ENV_HAS_MONTH_COLUMNS )); then
+  CLI_TASKBAR_CAL_MONTH_COLUMNS="$ENV_MONTH_COLUMNS"
+fi
+if (( ENV_HAS_MONTH_LINES )); then
+  CLI_TASKBAR_CAL_MONTH_LINES="$ENV_MONTH_LINES"
+fi
+if (( ENV_HAS_MONTH_CLASS )); then
+  CLI_TASKBAR_CAL_MONTH_CLASS="$ENV_MONTH_CLASS"
+fi
+if (( ENV_HAS_MONTH_TITLE )); then
+  CLI_TASKBAR_CAL_MONTH_TITLE="$ENV_MONTH_TITLE"
+fi
+if (( ENV_HAS_WEEK_NUMBERS )); then
+  CLI_TASKBAR_CAL_WEEK_NUMBERS="$ENV_WEEK_NUMBERS"
+fi
+
+calendar_columns="${CLI_TASKBAR_CAL_MONTH_COLUMNS:-$DEFAULT_COLUMNS}"
+calendar_lines="${CLI_TASKBAR_CAL_MONTH_LINES:-$DEFAULT_LINES}"
+calendar_class="${CLI_TASKBAR_CAL_MONTH_CLASS:-$DEFAULT_CLASS}"
+calendar_title="${CLI_TASKBAR_CAL_MONTH_TITLE:-$DEFAULT_TITLE}"
+week_numbers="$(normalize_bool "${CLI_TASKBAR_CAL_WEEK_NUMBERS:-$DEFAULT_WEEK_NUMBERS}" "$DEFAULT_WEEK_NUMBERS")"
+cli_week_numbers=""
+
+positional=()
+while (( "$#" )); do
+  case "$1" in
+    --columns)
+      [[ "$#" -ge 2 ]] || die "missing value for --columns"
+      calendar_columns="$2"
+      shift 2
+      ;;
+    --lines)
+      [[ "$#" -ge 2 ]] || die "missing value for --lines"
+      calendar_lines="$2"
+      shift 2
+      ;;
+    --class)
+      [[ "$#" -ge 2 ]] || die "missing value for --class"
+      calendar_class="$2"
+      shift 2
+      ;;
+    --title)
+      [[ "$#" -ge 2 ]] || die "missing value for --title"
+      calendar_title="$2"
+      shift 2
+      ;;
+    --week-numbers)
+      cli_week_numbers=1
+      shift
+      ;;
+    --no-week-numbers)
+      cli_week_numbers=0
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      while (( "$#" )); do
+        positional+=("$1")
+        shift
+      done
+      ;;
+    -*)
+      die "unknown option: $1"
+      ;;
+    *)
+      positional+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [[ -n "$cli_week_numbers" ]]; then
+  week_numbers="$cli_week_numbers"
+fi
+
+(( ${#positional[@]} <= 2 )) || die "too many positional arguments"
+
+input_month="${positional[0]:-$(date +%m)}"
+input_year="${positional[1]:-$(date +%Y)}"
+
+[[ "$input_month" =~ ^[0-9]{1,2}$ ]] || die "month must be 1-12"
+month_num=$((10#$input_month))
+(( month_num >= 1 && month_num <= 12 )) || die "month must be 1-12"
+
+[[ "$input_year" =~ ^-?[0-9]+$ ]] || die "year must be an integer"
+
+is_positive_int "$calendar_columns" || die "--columns must be a positive integer"
+is_positive_int "$calendar_lines" || die "--lines must be a positive integer"
+
+command -v alacritty >/dev/null 2>&1 || die "alacritty is required"
+command -v cal >/dev/null 2>&1 || die "cal (util-linux) is required"
+
+alacritty \
+  --class "$calendar_class" \
+  --title "$calendar_title" \
+  -o "window.dimensions.columns=${calendar_columns}" \
+  -o "window.dimensions.lines=${calendar_lines}" \
+  -e bash -c '
+launch_target() {
+  local target="$1"
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl dispatch exec "$target"
+  elif command -v swaymsg >/dev/null 2>&1; then
+    swaymsg exec "$target"
+  elif command -v systemd-run >/dev/null 2>&1; then
+    systemd-run --user --collect "$target" >/dev/null 2>&1 || "$target"
+  else
+    "$target"
+  fi
+}
+
+month=$((10#$1))
+year="$2"
+week_numbers="$3"
+esc=$(printf "\\033")
+
+while true; do
+  clear
+  if [[ "$week_numbers" == "1" ]]; then
+    cal -w "$month" "$year"
+  else
+    cal "$month" "$year"
+  fi
+
+  IFS= read -rsn1 key || break
+  case "$key" in
+    "$esc")
+      IFS= read -rsn2 arrow || true
+      case "$arrow" in
+        "[C") year=$((year + 1)) ;;
+        "[D") year=$((year - 1)) ;;
+        "[A")
+          month=$((month - 1))
+          if (( month < 1 )); then
+            month=12
+            year=$((year - 1))
+          fi
+          ;;
+        "[B")
+          month=$((month + 1))
+          if (( month > 12 )); then
+            month=1
+            year=$((year + 1))
+          fi
+          ;;
+      esac
+      ;;
+    [qQ])
+      break
+      ;;
+    t)
+      current_month=$(date +%m)
+      month=$((10#$current_month))
+      year=$(date +%Y)
+      ;;
+    y)
+      launch_target taskbar-year-calendar
+      break
+      ;;
+  esac
+done
+' _ "$month_num" "$input_year" "$week_numbers" >/dev/null 2>&1 &

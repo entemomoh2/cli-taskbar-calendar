@@ -1,0 +1,8 @@
+{
+  "clock": {
+    "format": "<span color='#ee99a0'>  </span>{:%a %d.%m | %H:%M}",
+    "tooltip": false,
+    "interval": 1,
+    "on-click": "taskbar-month-calendar"
+  }
+}
