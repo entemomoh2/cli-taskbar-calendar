@@ -173,7 +173,7 @@ command -v alacritty >/dev/null 2>&1 || die "alacritty is required"
 command -v cal >/dev/null 2>&1 || die "cal (util-linux) is required"
 
 alacritty \
-  --class "$calendar_class" \
+  --class "${calendar_class},${calendar_class}" \
   --title "$calendar_title" \
   -o "window.dimensions.columns=${calendar_columns}" \
   -o "window.dimensions.lines=${calendar_lines}" \

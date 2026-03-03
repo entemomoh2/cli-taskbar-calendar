@@ -18,6 +18,16 @@ It is desktop-agnostic at runtime. Window placement and geometry are intentional
 - Config file + env vars + CLI flags with strict precedence
 - Global show/hide option for week numbers
 
+## Screenshots
+
+### Month view
+
+![Month calendar popup](examples/month_calendar.png)
+
+### Year view
+
+![Year calendar popup](examples/year_calendar.png)
+
 ## Runtime dependencies
 
 - `bash`
